@@ -72,7 +72,12 @@ func (v *Value) Pow(p float64) *Value {
 }
 
 func (v *Value) Relu() *Value {
-	out := MakeVal(v.value, [2]*Value{v, nil}, "relu")
+	val := 0.0
+	if v.value > 0 {
+		val = v.value
+	}
+
+	out := MakeVal(val, [2]*Value{v, nil}, "relu")
 	out.back = func() {
 		if v.value > 0 {
 			v.grad += out.grad
@@ -249,38 +254,15 @@ func (m *Model) String() string {
 }
 
 func main() {
-	/*   x = Value(-4.0)
-	z = 2 * x + 2 + x
-	q = z.relu() + z * x
-	h = (z * z).relu()
-	y = h + q + q * x
-	y.backward()
-	xmg, ymg = x, y
-
-	x = torch.Tensor([-4.0]).double()
-	x.requires_grad = True
-	z = 2 * x + 2 + x
-	q = z.relu() + z * x
-	h = (z * z).relu()
-	y = h + q + q * x
-	y.backward()
-	xpt, ypt = x, y
-
-	# forward pass went well
-	assert ymg.data == ypt.data.item()
-	# backward pass went well
-	assert xmg.grad == xpt.grad.item()
-
-	In Go:
-	*/
-
 	x := Val(-4.0)
 	z := x.Mul(Val(2)).Add(Val(2)).Add(x)
 	q := z.Relu().Add(z.Mul(x))
 	h := z.Mul(z).Relu()
 	y := h.Add(q).Add(q.Mul(x))
+	fmt.Println(x.grad)
 	y.Backward()
 
 	fmt.Println(x, y)
+	fmt.Println(x.grad, y.grad)
 
 }
